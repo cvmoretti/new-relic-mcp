@@ -1,23 +1,23 @@
 # 🚀 New Relic MCP Server
 
-A **Model Context Protocol (MCP)** server that enables seamless New Relic integration directly within Cursor IDE. Execute NRQL queries, search logs, and monitor applications without leaving your development environment.
+A **Model Context Protocol (MCP)** server that enables seamless New Relic integration with any MCP-compatible IDE or application. Execute NRQL queries, search logs, and monitor applications without leaving your development environment.
 
 ## ✨ Features
 
-- **🔍 NRQL Query Execution** - Run custom New Relic queries directly from Cursor
+- **🔍 NRQL Query Execution** - Run custom New Relic queries directly from your IDE
 - **📊 Application Monitoring** - List and search New Relic applications
 - **📝 Log Analysis** - Search and analyze logs using NRQL
 - **🐳 Docker Containerized** - Fully isolated with zero local dependencies
-- **🔄 Persistent Container** - Runs continuously, ready for Cursor connections
+- **🔄 Persistent Container** - Runs continuously, ready for MCP client connections
 - **🛡️ Secure** - Environment-based credential management
 
 ## 🏗️ Architecture
 
 ```
-Cursor IDE ↔ MCP Protocol ↔ Docker Container ↔ New Relic CLI ↔ New Relic API
+MCP Client (IDE/App) ↔ MCP Protocol ↔ Docker Container ↔ New Relic CLI ↔ New Relic API
 ```
 
-The server acts as a bridge between Cursor and New Relic, translating natural language requests into NRQL queries and returning formatted results.
+The server acts as a bridge between any MCP client and New Relic, translating natural language requests into NRQL queries and returning formatted results.
 
 ## 🚀 Quick Start
 
@@ -25,7 +25,7 @@ The server acts as a bridge between Cursor and New Relic, translating natural la
 
 - **Docker Desktop** installed and running
 - **New Relic Account** with API access
-- **Cursor IDE** with MCP support
+- **MCP-compatible client** (IDE or application with MCP support)
 
 ### 1. Clone and Setup
 
@@ -48,14 +48,14 @@ chmod +x run_mcp_docker.sh newrelic-mcp
 ./run_mcp_docker.sh run
 ```
 
-### 3. Configure Cursor
+### 3. Configure Your MCP Client
 
 Get your project path:
 ```bash
 pwd  # Copy this output
 ```
 
-**Cursor → Settings → Features → Model Context Protocol → Edit Configuration:**
+**Configure your MCP client to use this server:**
 ```json
 {
   "mcpServers": {
@@ -68,9 +68,12 @@ pwd  # Copy this output
 
 Replace `/YOUR/PROJECT/PATH/` with the output from `pwd`.
 
-### 4. Restart Cursor
+**For Cursor IDE:** Settings → Features → Model Context Protocol → Edit Configuration  
+**For other clients:** Refer to your client's MCP configuration documentation
 
-Completely restart Cursor IDE to activate the MCP integration.
+### 4. Restart Your Client
+
+Completely restart your MCP client to activate the integration.
 
 ## 🛠️ Available Tools
 
@@ -150,7 +153,7 @@ docker ps | grep newrelic-mcp
 # Stop the server
 ./run_mcp_docker.sh stop
 
-# Show Cursor configuration
+# Show MCP configuration
 ./run_mcp_docker.sh config
 ```
 
@@ -163,10 +166,10 @@ docker ps | grep newrelic-mcp
 ./run_mcp_docker.sh run
 ```
 
-**❌ "No tools found in Cursor"**
+**❌ "No tools found in MCP client"**
 1. Check container: `docker ps | grep newrelic-mcp`
 2. Restart container: `./run_mcp_docker.sh restart`
-3. Restart Cursor completely
+3. Restart your MCP client completely
 4. Verify configuration path is absolute
 
 **❌ "NRQL Queries fail"**
@@ -191,10 +194,10 @@ docker ps | grep newrelic-mcp
 ├── README.md                    # This documentation
 ├── mcp_docker_server.py         # Core MCP server implementation
 ├── Dockerfile.mcp               # Docker image definition
-├── newrelic-mcp                 # Cursor wrapper script
+├── newrelic-mcp                 # MCP client wrapper script
 ├── run_mcp_docker.sh           # Container management script
 ├── config.env.example          # Environment template
-└── cursor-mcp-config.json      # Cursor configuration template
+└── cursor-mcp-config.json      # MCP configuration template
 ```
 
 ## 🔐 Security
@@ -208,7 +211,7 @@ docker ps | grep newrelic-mcp
 
 - **✅ Zero Local Setup** - Everything runs in Docker
 - **✅ Natural Language** - Ask questions in plain English
-- **✅ Real-time Insights** - Immediate data access from Cursor
+- **✅ Real-time Insights** - Immediate data access from your IDE
 - **✅ Team Ready** - Easy setup and reproducible environment
 - **✅ Production Ready** - Robust error handling and logging
 
@@ -217,7 +220,7 @@ docker ps | grep newrelic-mcp
 1. **Check container status**: `./run_mcp_docker.sh test`
 2. **View logs**: `./run_mcp_docker.sh logs`
 3. **Restart everything**: `./run_mcp_docker.sh restart`
-4. **Test NRQL in New Relic UI** before using in Cursor
+4. **Test NRQL in New Relic UI** before using in your MCP client
 
 ## 🚀 Advanced Usage
 
@@ -233,4 +236,4 @@ docker ps | grep newrelic-mcp
 
 ---
 
-**🎯 Your New Relic data is now accessible directly from Cursor! Start asking questions about your application performance, errors, and user behavior using natural language.**
+**🎯 Your New Relic data is now accessible directly from your MCP-compatible IDE! Start asking questions about your application performance, errors, and user behavior using natural language.**
