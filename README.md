@@ -21,33 +21,36 @@ The server acts as a bridge between Cursor and New Relic, translating natural la
 
 ## 🚀 Quick Start
 
-> **📖 First time setup?** See detailed instructions in [`INSTALLATION.md`](INSTALLATION.md)
-
 ### Prerequisites
 
 - **Docker Desktop** installed and running
 - **New Relic Account** with API access
 - **Cursor IDE** with MCP support
 
-### 1. Environment Setup
+### 1. Clone and Setup
 
 ```bash
+# Clone the repository
+git clone https://github.com/cvmoretti/new-relic-mcp.git
+cd new-relic-mcp
+
 # Copy configuration template
 cp config.env.example .env
 
-# Edit with your New Relic credentials
-# Add: NEW_RELIC_API_KEY, NEW_RELIC_ACCOUNT_ID, NEW_RELIC_REGION
+# Edit .env with your New Relic credentials
+# Required: NEW_RELIC_API_KEY, NEW_RELIC_ACCOUNT_ID, NEW_RELIC_REGION
 ```
 
 ### 2. Start the MCP Server
 
 ```bash
+chmod +x run_mcp_docker.sh newrelic-mcp
 ./run_mcp_docker.sh run
 ```
 
 ### 3. Configure Cursor
 
-**Get your project path:**
+Get your project path:
 ```bash
 pwd  # Copy this output
 ```
@@ -71,45 +74,66 @@ Completely restart Cursor IDE to activate the MCP integration.
 
 ## 🛠️ Available Tools
 
-### 1. **newrelic_query**
-Execute custom NRQL queries for metrics, transactions, and analytics.
+### 1. **newrelic_query** - Execute NRQL queries
+**Example:** *"Execute this NRQL query: SELECT count(*) FROM Transaction SINCE 1 hour ago"*
 
-**Example Usage in Cursor:**
-> "Execute this NRQL query: SELECT count(*) FROM Transaction SINCE 1 hour ago"
+### 2. **newrelic_apps** - List applications  
+**Example:** *"Show me all New Relic applications"*
 
-### 2. **newrelic_apps** 
-List and search New Relic applications.
+### 3. **newrelic_logs** - Search logs
+**Example:** *"Search New Relic logs: SELECT * FROM Log WHERE level = 'ERROR' SINCE 30 minutes ago LIMIT 10"*
 
-**Example Usage in Cursor:**
-> "Show me all New Relic applications"
+## 📊 Common NRQL Queries
 
-### 3. **newrelic_logs**
-Search logs using NRQL queries.
+### Performance Monitoring
+```sql
+-- Average response time by application
+SELECT average(duration) FROM Transaction SINCE 1 hour ago FACET appName
 
-**Example Usage in Cursor:**
-> "Search New Relic logs: SELECT * FROM Log WHERE level = 'ERROR' SINCE 30 minutes ago LIMIT 10"
+-- 95th percentile response times
+SELECT percentile(duration, 95) FROM Transaction SINCE 1 day ago FACET appName
 
-## 📊 Usage Examples
+-- Slowest transactions
+SELECT * FROM Transaction WHERE duration > 1 SINCE 1 hour ago LIMIT 20
+```
+
+### Error Analysis
+```sql
+-- Error rate by application
+SELECT percentage(count(*), WHERE error IS true) FROM Transaction SINCE 1 hour ago FACET appName
+
+-- Most common errors
+SELECT count(*) FROM TransactionError SINCE 1 day ago FACET error.message LIMIT 10
+
+-- 4xx and 5xx errors
+SELECT count(*) FROM Transaction WHERE response.status >= 400 SINCE 1 hour ago FACET response.status
+```
+
+### Infrastructure Metrics
+```sql
+-- CPU usage by host
+SELECT average(cpuPercent) FROM SystemSample SINCE 1 hour ago FACET hostname
+
+-- Memory usage trends
+SELECT average(memoryUsedPercent) FROM SystemSample SINCE 1 day ago TIMESERIES 1 hour
+```
+
+## 💬 Usage Examples
 
 ### Performance Analysis
 - *"What's the average response time for my applications in the last hour?"*
 - *"Show me the slowest transactions from the past 30 minutes"*
-- *"Execute: SELECT percentile(duration, 95) FROM Transaction SINCE 1 day ago"*
+- *"Find applications with high error rates"*
 
 ### Error Investigation
 - *"Find all errors in the last hour grouped by application"*
-- *"Search for 500 errors: SELECT count(*) FROM TransactionError WHERE response.status = '500' SINCE 1 hour ago"*
+- *"Search for 500 errors in the past day"*
 - *"Show me recent critical log entries"*
 
-### Application Monitoring
-- *"List all applications with their transaction counts"*
-- *"Find applications with high error rates"*
-- *"Show me database query performance metrics"*
-
-### Custom Analytics
-- *"Execute: SELECT count(*) FROM PageView WHERE userAgentName = 'Chrome' SINCE 1 week ago"*
-- *"Analyze user sessions by geography"*
-- *"Monitor API endpoint performance trends"*
+### Business Intelligence
+- *"What are the most popular API endpoints?"*
+- *"Show me user session analysis for today"*
+- *"Monitor deployment impact on performance"*
 
 ## 🔧 Management Commands
 
@@ -132,44 +156,45 @@ docker ps | grep newrelic-mcp
 
 ## 🚨 Troubleshooting
 
-### Problem: "Container not running" Error
-**Solution:**
+### Common Issues
+
+**❌ "Container not running"**
 ```bash
 ./run_mcp_docker.sh run
 ```
 
-### Problem: Cursor shows "No tools found"
-**Solutions:**
-1. Ensure container is running: `docker ps | grep newrelic-mcp`
-2. Restart the container: `./run_mcp_docker.sh restart`
+**❌ "No tools found in Cursor"**
+1. Check container: `docker ps | grep newrelic-mcp`
+2. Restart container: `./run_mcp_docker.sh restart`
 3. Restart Cursor completely
-4. Verify configuration path is correct
+4. Verify configuration path is absolute
 
-### Problem: NRQL Queries Fail
-**Solutions:**
+**❌ "NRQL Queries fail"**
 1. Check credentials in `.env` file
-2. Verify New Relic CLI authentication:
-```bash
-docker exec newrelic-mcp-server newrelic profile list
-```
-3. Test with simple query: `SELECT count(*) FROM Transaction SINCE 1 hour ago`
+2. Test with simple query: `SELECT count(*) FROM Transaction SINCE 1 hour ago`
+3. Verify account access in New Relic UI
 
-### Problem: Connection Issues
-**Solutions:**
-1. Check Docker is running: `docker info`
-2. Rebuild container: `./run_mcp_docker.sh run`
-3. View detailed logs: `./run_mcp_docker.sh logs`
+**❌ "Authentication failed"**
+1. Verify `NEW_RELIC_API_KEY` is correct
+2. Check `NEW_RELIC_ACCOUNT_ID` matches your account
+3. Ensure API key has proper permissions
+
+### Getting Your Credentials
+
+1. **API Key**: [New Relic API Keys page](https://one.newrelic.com/admin-portal/api-keys-ui/api-keys)
+2. **Account ID**: Found in New Relic URL or account dropdown
+3. **Region**: `US` or `EU` depending on your New Relic region
 
 ## 📁 Project Structure
 
 ```
-├── README.md                  # This documentation
-├── mcp_docker_server.py       # Core MCP server implementation
-├── Dockerfile.mcp             # Docker image definition
-├── newrelic-mcp              # Cursor wrapper script
-├── run_mcp_docker.sh         # Container management script
-├── config.env.example        # Environment template
-└── .env                      # Your credentials (create from template)
+├── README.md                    # This documentation
+├── mcp_docker_server.py         # Core MCP server implementation
+├── Dockerfile.mcp               # Docker image definition
+├── newrelic-mcp                 # Cursor wrapper script
+├── run_mcp_docker.sh           # Container management script
+├── config.env.example          # Environment template
+└── cursor-mcp-config.json      # Cursor configuration template
 ```
 
 ## 🔐 Security
@@ -182,48 +207,29 @@ docker exec newrelic-mcp-server newrelic profile list
 ## 🎯 Benefits
 
 - **✅ Zero Local Setup** - Everything runs in Docker
-- **✅ Persistent Container** - Always ready for connections
 - **✅ Natural Language** - Ask questions in plain English
-- **✅ Rich Responses** - Formatted JSON with insights
-- **✅ Team Ready** - Easy to share and reproduce
+- **✅ Real-time Insights** - Immediate data access from Cursor
+- **✅ Team Ready** - Easy setup and reproducible environment
 - **✅ Production Ready** - Robust error handling and logging
-
-## 🚀 Advanced Usage
-
-### Custom NRQL Queries
-You can execute any valid NRQL query:
-```
-"Execute: SELECT count(*) FROM Transaction WHERE response.status >= 400 SINCE 1 day ago FACET appName"
-```
-
-### Multi-step Analysis
-Ask follow-up questions based on results:
-```
-1. "Show me error rates by application"
-2. "Now drill down into the application with highest errors"
-3. "What are the specific error messages for that app?"
-```
-
-### Performance Monitoring
-```
-"Create a performance dashboard query for my frontend app"
-"Show me the P95 response time trends for the last week"
-"Find slow database queries impacting user experience"
-```
 
 ## 📞 Support
 
-- **Container Issues**: Check Docker Desktop is running
-- **Authentication Issues**: Verify New Relic API key and permissions
-- **Query Issues**: Validate NRQL syntax in New Relic UI first
-- **Cursor Issues**: Ensure MCP configuration path is absolute
+1. **Check container status**: `./run_mcp_docker.sh test`
+2. **View logs**: `./run_mcp_docker.sh logs`
+3. **Restart everything**: `./run_mcp_docker.sh restart`
+4. **Test NRQL in New Relic UI** before using in Cursor
 
-## 🎉 Status
+## 🚀 Advanced Usage
 
-**✅ Production Ready** - Fully tested with real New Relic data  
-**✅ Team Ready** - Comprehensive documentation included  
-**✅ Cursor Integrated** - Native MCP protocol support  
-**✅ Docker Isolated** - Zero impact on local development environment  
+### Team Deployment
+- Share the repository URL
+- Each team member follows Quick Start
+- Use shared New Relic service account credentials
+
+### Custom Queries
+- Start with simple queries and build complexity
+- Use `LIMIT` clauses to avoid large result sets  
+- Include time ranges (`SINCE`) for better performance
 
 ---
 
