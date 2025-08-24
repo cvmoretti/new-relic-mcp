@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "newrelic": {
+      "command": "/path/to/your/project/newrelic-mcp"
+    }
+  }
+}
+
+// INSTRUCTIONS:
+// 1. Replace "/path/to/your/project/" with your actual project path
+// 2. Run "pwd" in your project directory to get the correct path
+// 3. Example: If pwd shows "/Users/john/CursorProject", 
+//    use "/Users/john/CursorProject/newrelic-mcp"
+// 4. Copy this configuration to Cursor:
+//    Cursor → Settings → Features → Model Context Protocol → Edit Configuration

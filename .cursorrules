@@ -1,0 +1,27 @@
+# New Relic MCP Server
+
+Model Context Protocol (MCP) Server for seamless New Relic integration with Cursor IDE.
+
+## Features
+- Execute NRQL queries directly from Cursor
+- Search and analyze New Relic logs
+- Monitor applications and performance metrics
+- Natural language query interface
+
+## Quick Start
+```bash
+# 1. Configure credentials
+cp config.env.example .env
+# Edit .env with your New Relic credentials
+
+# 2. Start the server
+./run_mcp_docker.sh run
+
+# 3. Configure Cursor with the displayed MCP configuration
+# 4. Restart Cursor and start querying!
+```
+
+## Requirements
+- Docker Desktop installed and running
+- Valid New Relic API key and account access
+- Cursor IDE with MCP support

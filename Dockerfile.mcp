@@ -1,0 +1,45 @@
+# New Relic MCP Server - Docker Image for Cursor Integration
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    gnupg2 \
+    ca-certificates \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install New Relic CLI
+RUN curl -s https://download.newrelic.com/install/newrelic-cli/scripts/install.sh | bash
+
+# Add New Relic CLI to PATH
+ENV PATH="/usr/local/bin:${PATH}"
+
+# Copy MCP server
+COPY mcp_docker_server.py /app/mcp_server.py
+
+# Make it executable
+RUN chmod +x /app/mcp_server.py
+
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash mcp
+USER mcp
+
+# Set Python to unbuffered mode
+ENV PYTHONUNBUFFERED=1
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import sys; print('MCP Server Ready'); sys.exit(0)"
+
+# Default command - keep container alive and ready for MCP connections
+CMD ["tail", "-f", "/dev/null"]
+
+# Labels
+LABEL maintainer="your-email@example.com"
+LABEL description="MCP Server for New Relic integration with Cursor"
+LABEL version="1.0.0"
